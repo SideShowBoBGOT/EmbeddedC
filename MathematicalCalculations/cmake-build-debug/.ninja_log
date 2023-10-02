@@ -1,0 +1,8 @@
+# ninja log v5
+0	30	1696264962531447335	CMakeFiles/MathematicalCalculations.dir/main.c.o	1858e0ac4edeaae2
+0	16	1696265460587038421	build.ninja	7ea516151f6518b5
+0	27	1696265461507030457	MathematicalCalculations	2c4c65df4074bec1
+0	71	1696265933650989497	CMakeFiles/MathematicalCalculations.dir/main.c.o	1858e0ac4edeaae2
+71	94	1696265933674989293	MathematicalCalculations	2c4c65df4074bec1
+0	29	1696265950754844371	CMakeFiles/MathematicalCalculations.dir/main.c.o	1858e0ac4edeaae2
+29	54	1696265950782844133	MathematicalCalculations	2c4c65df4074bec1
