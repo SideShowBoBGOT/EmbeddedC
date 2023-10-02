@@ -9,9 +9,9 @@ int main() {
     char buf[255] = {0};
 
     printf("Enter alpha: ");
-    scanf("%s", buf);
+    fgets(buf, sizeof(buf), stdin);
 
-    double alpha = strtod(buf, NULL);;
+    double alpha = strtod(buf, NULL);
 
     printf("z_1: %lf\n", calc_z_one(alpha));
     printf("z_2: %lf\n", calc_z_two(alpha));
