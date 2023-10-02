@@ -1,3 +1,0 @@
-/home/sideshowbobgot/university/EmbeddedC/MathematicalCalculations/cmake-build-debug/CMakeFiles/MathematicalCalculations.dir
-/home/sideshowbobgot/university/EmbeddedC/MathematicalCalculations/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/sideshowbobgot/university/EmbeddedC/MathematicalCalculations/cmake-build-debug/CMakeFiles/rebuild_cache.dir
