@@ -6,18 +6,18 @@
 struct node_struct;
 typedef struct node_struct node;
 
-typedef void(*list__dtor)(void*);
 typedef void*(*list__cpy)(const void*);
+typedef void(*list__dtor)(void*);
 
 typedef struct list_struct {
     unsigned length;
     node* root;
     node* tail;
-    list__dtor dtor;
     list__cpy cpy;
+    list__dtor dtor;
 } list;
 
-list* list__new(list__dtor dtor, list__cpy cpy);
+list* list__new(list__cpy cpy, list__dtor dtor);
 void list__push_front(list* self, void* data, size_t size);
 void list__push_back(list* self, void* data, size_t size);
 int list__pop_front(list* self);

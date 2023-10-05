@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-list* list__new(list__dtor dtor, list__cpy cpy) {
+list* list__new(list__cpy cpy, list__dtor dtor) {
     list* new_list = (list*)malloc(sizeof(list));
     new_list->root = NULL;
     new_list->tail = NULL;

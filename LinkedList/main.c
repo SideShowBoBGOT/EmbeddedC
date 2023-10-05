@@ -19,9 +19,10 @@ int main() {
         book__create("Deathly Hallows", 7, KOREAN, 7, 2007),
     };
 
-    list* l = list__new();
+    list* l = list__new((list__cpy)book__cpy, (list__dtor)book__dtor);
     for(unsigned i = 0; i < TOTAL_BOOKS; ++i) {
         list__push_back(l, &books[i], sizeof(book));
+        book__dtor(&books[i]);
     }
 
     printf("List:\n");
