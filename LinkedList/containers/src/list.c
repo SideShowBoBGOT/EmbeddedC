@@ -52,7 +52,7 @@ int list__pop_front(list* self) {
         self->tail = NULL;
         self->root = NULL;
     }
-    free(old_root->data);
+    self->dtor(old_root->data);
     free(old_root);
     --self->length;
     return 0;
@@ -71,7 +71,7 @@ int list__pop_back(list* self) {
         self->tail = NULL;
         self->root = NULL;
     }
-    free(old_tail->data);
+    self->dtor(old_tail->data);
     free(old_tail);
     --self->length;
     return 0;

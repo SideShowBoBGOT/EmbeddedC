@@ -22,10 +22,10 @@ typedef struct {
     int pub_year;
 } book;
 
-book book__create(const char* title, double price, language lang, double weight, int pub_year);
-book* book__new(char* title, double price, language lang, double weight, int pub_year);
-void* book__cpy(const void* book);
-void book__dtor(void* book);
+//book book__create(const char* title, double price, language lang, double weight, int pub_year);
+book* book__new(const char* title, double price, language lang, double weight, int pub_year);
+void* book__cpy(const void* self);
+void book__dtor(void* self);
 void book__print(const book* self);
 
 #endif //LINKEDLIST_BOOK_H
