@@ -1,23 +1,20 @@
-#include "list.h"
+#include "../include/list.h"
+#include "node.h"
 
 #include <stdlib.h>
 
-static node* create_node(void* data, size_t size) {
-    node* new_node = (node*)malloc(sizeof(node));
-    new_node->next = NULL;
-    new_node->prev = NULL;
-    new_node->data = malloc(size);
-    memcpy(new_node->data, data, size);
-    return new_node;
-}
-
-list list__new() {
-    list l = {.root=NULL, .tail=NULL};
-    return l;
+list* list__new(list__dtor dtor, list__cpy cpy) {
+    list* new_list = (list*)malloc(sizeof(list));
+    new_list->root = NULL;
+    new_list->tail = NULL;
+    new_list->length = 0;
+    new_list->dtor = dtor;
+    new_list->cpy = cpy;
+    return new_list;
 }
 
 void list__push_front(list* self, void* data, size_t size) {
-    node* new_node = create_node(data, size);
+    node* new_node = node__new(data, self->cpy);
     if(self->root == NULL) {
         self->root = new_node;
         self->tail = new_node;
@@ -26,10 +23,11 @@ void list__push_front(list* self, void* data, size_t size) {
         self->root->prev = new_node;
         self->root = new_node->next;
     }
+    ++self->length;
 }
 
 void list__push_back(list* self, void* data, size_t size) {
-    node* new_node = create_node(data, size);
+    node* new_node = node__new(data, self->cpy);
     if(self->tail == NULL) {
         self->root = new_node;
         self->tail = new_node;
@@ -38,6 +36,7 @@ void list__push_back(list* self, void* data, size_t size) {
         self->tail->next = new_node;
         self->tail = new_node;
     }
+    ++self->length;
 }
 
 int list__pop_front(list* self) {
@@ -55,6 +54,7 @@ int list__pop_front(list* self) {
     }
     free(old_root->data);
     free(old_root);
+    --self->length;
     return 0;
 }
 
@@ -73,6 +73,19 @@ int list__pop_back(list* self) {
     }
     free(old_tail->data);
     free(old_tail);
+    --self->length;
+    return 0;
+}
+
+int list__at(const list* self, unsigned index, void** data) {
+    if(index >= self->length) {
+        return -1;
+    }
+    node* n = self->root;
+    for(unsigned i = 0; i < index; ++i) {
+        n = n->next;
+    }
+    *data = n->data;
     return 0;
 }
 
@@ -81,11 +94,11 @@ void list__free(list* self) {
     while(n != NULL) {
         node* old = n;
         n = n->next;
-        free(old->data);
+        self->dtor(old->data);
         free(old);
     }
+    self->root = NULL;
+    self->tail = NULL;
+    self->length = 0;
+    free(self);
 }
-
-
-
-
