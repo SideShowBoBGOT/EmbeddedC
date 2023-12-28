@@ -27,10 +27,34 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+typedef enum
+{
+	C4,
+	C5,
+	D5,
+	E5,
+	F5,
+	G5,
+	A5,
+	B5,
+	C6,
+	D6,
+	E6,
+	F6,
+	G6,
+	A6,
+	B6,
+	C7
+} soundToneType;
+
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+#define CS43L22_I2C_ADDRESS		0x94
+#define I2C_TIMEOUT				10
 
 /* USER CODE END PD */
 
@@ -47,6 +71,8 @@ DMA_HandleTypeDef hdma_spi3_tx;
 
 /* USER CODE BEGIN PV */
 
+int16_t dataI2S[100] = {0};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,6 +87,196 @@ static void MX_I2S3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void CS43L22_Init(void)
+{
+	// Enable chip
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
+
+	//
+	// Initialization
+	//
+	uint8_t TxBuffer[2];
+
+	TxBuffer[0] = 0x0D;
+	TxBuffer[1] = 0x01;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x00;
+	TxBuffer[1] = 0x99;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x47;
+	TxBuffer[1] = 0x80;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x32;
+	TxBuffer[1] = 0xFF;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x32;
+	TxBuffer[1] = 0x7F;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x00;
+	TxBuffer[1] = 0x00;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x04;
+	TxBuffer[1] = 0xAF;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x0D;
+	TxBuffer[1] = 0x70;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x05;
+	TxBuffer[1] = 0x81;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x06;
+	TxBuffer[1] = 0x07;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x0A;
+	TxBuffer[1] = 0x00;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x27;
+	TxBuffer[1] = 0x00;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x1A;
+	TxBuffer[1] = 0x0A;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x1B;
+	TxBuffer[1] = 0x0A;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x1F;
+	TxBuffer[1] = 0x0F;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	TxBuffer[0] = 0x02;
+	TxBuffer[1] = 0x9E;
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+}
+
+void CS43L22_Beep(soundToneType pitch, uint32_t duration_ms)
+{
+	uint8_t TxBuffer[2];
+
+	// Set volume and off time
+	TxBuffer[0] = 0x1D;		// Register address
+	TxBuffer[1] = 0x00;		// Value (volume and off time)
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	// Set sound frequency
+	TxBuffer[0] = 0x1C;		// Register address
+	switch (pitch)
+	{
+		case C4:
+			TxBuffer[1] = 0x00;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case C5:
+			TxBuffer[1] = 0x10;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case D5:
+			TxBuffer[1] = 0x20;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case E5:
+			TxBuffer[1] = 0x30;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case F5:
+			TxBuffer[1] = 0x40;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case G5:
+			TxBuffer[1] = 0x50;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case A5:
+			TxBuffer[1] = 0x60;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case B5:
+			TxBuffer[1] = 0x70;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case C6:
+			TxBuffer[1] = 0x80;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case D6:
+			TxBuffer[1] = 0x90;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case E6:
+			TxBuffer[1] = 0xA0;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case F6:
+			TxBuffer[1] = 0xB0;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case G6:
+			TxBuffer[1] = 0xC0;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case A6:
+			TxBuffer[1] = 0xD0;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case B6:
+			TxBuffer[1] = 0xE0;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+		case C7:
+			TxBuffer[1] = 0xF0;		// Value (frequency and on time)
+			break;
+		// Assume C4 for all other cases
+
+
+		default:
+			TxBuffer[1] = 0x00;		// Value (frequency and on time)
+			break;
+	}
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	// Enable continuous mode (SOUND STARTED)
+	TxBuffer[0] = 0x1E;		// Register address
+	TxBuffer[1] = 0xC0;		// Value (beep and tone configuration)
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+
+	// Playing...
+	HAL_Delay(duration_ms);
+
+	// Disable continuous mode (SOUND STOPED)
+	TxBuffer[0] = 0x1E;		// Register address
+	TxBuffer[1] = 0x00;		// Value (beep and tone configuration)
+	HAL_I2C_Master_Transmit(&hi2c1, CS43L22_I2C_ADDRESS, (uint8_t*) &TxBuffer, 2, I2C_TIMEOUT);
+}
+
 
 /* USER CODE END 0 */
 
@@ -97,12 +313,48 @@ int main(void)
   MX_I2S3_Init();
   /* USER CODE BEGIN 2 */
 
+  // Init DAC
+  CS43L22_Init();
+
+  // Transmit empty data
+  HAL_I2S_Transmit_DMA(&hi2s3, (uint16_t *)dataI2S, 100);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  int16_t note=200;
+
+	  CS43L22_Beep(C5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(C5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(D5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(D5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(E5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(E5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(F5, 2*note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(E5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(E5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(D5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(D5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(C5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(C5, note);
+	  HAL_Delay(100);
+	  CS43L22_Beep(C5, 2*note);
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
